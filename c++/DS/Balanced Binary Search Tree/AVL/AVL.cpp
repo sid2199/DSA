@@ -90,8 +90,8 @@ class AVL {
         }
 
         void updateNodes(Node *node) {                                                                          // update the rotated node with new height and balance factor
-            update(node->left);
-            update(node->right);
+            if (node->left) update(node->left);
+            if (node->right) update(node->right);
             update(node);
         }
 
@@ -207,42 +207,72 @@ class AVL {
             cout << "\n";
         }
 
-        void remove (int data ) {
-            removeR(this->root, data);
+
+        void remove (int data) {
+            cout << "Removing " << data << "\n";
+            this->root = removeR(this->root, data);
         }
 
-        void removeR (Node *node, int data) {
+        Node* removeR(Node *node, int data) {
             if (node->data < data) removeR(node->right, data);
-            else if (data > node->data) removeR(node->left, data);
+            else if (data < node->data) removeR(node->left, data);
             else if (node->data == data) {
                 if (node->left && node->right) {
-                    if (node->right->left) node->data = removeAndUpdate(node->right);
-                    *node = *node->right;
+                    Node *temp = node;
+                    while (temp->left->left) temp = temp->left;
+                    node->data = temp->left->data;
+                    temp->left = temp->left->right;
+                    // removeR(node->left, temp->data);
                 }
-                else if (node->left || node->right) {
-                    if (node->left) *node = *node->left;
-                    else *node = *node->right;
-                }
+                else if (node->left) *node = *node->left;
+                else if (node->right) *node = *node->right;
                 else {
+                    // free(node);
                     node = NULL;
-                    free(node);
                 }
             }
-            else cout << data << " not in the tree\n";
-            update(node);
+            else cout << data << "not in the tree\n";
+            if (node) update(node);
+            return node;
         }
 
-        int removeAndUpdate (Node *node) {
-            int data;
-            if (node->left->left) return removeAndUpdate(node->left);
-            else {
-                int data = node->left->data;
-                free(node->left);
-                node->left = NULL;
-            }
-            update(node);
-            return data;
-        }
+        // void remove (int data ) {
+        //     cout << "Removing " << data << "\n";
+        //     removeR(this->root, data);
+        // }
+
+        // void removeR (Node *node, int data) {
+        //     if (node->data < data) removeR(node->right, data);
+        //     else if (data < node->data) removeR(node->left, data);
+        //     else if (node->data == data) {
+        //         cout << data << "\n";
+        //         int child = 0;
+        //         if (node->left) child++;
+        //         if (node->right) child+=2;
+        //         if (child == 3) {
+        //             if (node->right->left) node->data = removeAndUpdate(node->right);
+        //             *node = *node->right;
+        //         }
+        //         else if (child == 1) *node = *node->left;
+        //         else if (child == 2) *node = *node->right;
+        //         else if (child == 0) {
+        //             node = NULL;
+        //         }
+        //     }
+        //     else cout << data << " not in the tree\n";
+        //     if (node) update(node);
+        // }
+
+        // int removeAndUpdate (Node *node) {
+        //     int data;
+        //     if (node->left->left) removeAndUpdate(node->left);
+        //     else {
+        //         int data = node->left->data;
+        //         *node->left = *node->left->right;
+        //     }
+        //     update(node);
+        //     return data;
+        // }
 };
 
 int main () {
@@ -256,7 +286,10 @@ int main () {
     tree.lOT();
     tree.showMatrix();
     tree.remove(60);
+    tree.showMatrix();
     tree.remove(42);
+    tree.showMatrix();
+    tree.remove(20);
     tree.showMatrix();
     tree.remove(45);
     tree.showMatrix();
